@@ -2,9 +2,20 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { api } from './backend_hook.ts'
+import 'vite/modulepreload-polyfill'
 
 function App() {
   const [count, setCount] = useState(0)
+
+  async function clickButton() { 
+    console.log("Clicked! Notifying backend.")
+    await api("/inc")
+    console.log("Backend notified, getting new value!")
+    var c = (await api("/")).count
+    console.log("New value Recieved" + c)
+    setCount(c)
+  }
 
   return (
     <>
@@ -18,7 +29,7 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
+        <button onClick={clickButton}>
           count is {count}
         </button>
         <p>
