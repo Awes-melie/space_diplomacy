@@ -4,7 +4,25 @@ Retro 3D Space clone of Diplomacy
 
 HELLO YES I AM HERE TOO! HIHI!!!
 
-# TODO's
+## Development
+
+### Backend
+
+```sh
+cd js_backend
+npm ci
+npm run dev
+```
+
+### Frontend
+
+```sh
+cd frontend
+npm ci
+npm run dev
+```
+
+## TODO's
 
 -   Comms to backend
 -   Auth
