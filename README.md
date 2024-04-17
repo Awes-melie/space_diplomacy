@@ -2,8 +2,6 @@
 
 Retro 3D Space clone of Diplomacy
 
-HELLO YES I AM HERE TOO! HIHI!!!
-
 ## Development
 
 ### Backend
@@ -25,7 +23,10 @@ npm run dev
 ## TODO's
 
 -   Comms to backend
+  -   Backend to DB comms
 -   Auth
 -   Deployment
 -   Game flow
+  -   Agree on game state representation
+  -   Adjudicator function  
 -   Break this down further
