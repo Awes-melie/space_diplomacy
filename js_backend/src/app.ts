@@ -6,6 +6,7 @@ import cors from 'cors';
 import * as middlewares from './middlewares';
 import api from './api';
 import { Status, mongo } from './database';
+import { databaseMaintenance } from './databaseMaintenance';
 
 interface HealthResponse {
 	version: string;
@@ -45,6 +46,8 @@ app.use(middlewares.errorHandler);
 export async function startApp() {
 	console.log(`Connecting to database`);
 	await mongo.connect();
+
+	await databaseMaintenance();
 
 	const port = process.env.PORT || 3000;
 	app.listen(port, () => {

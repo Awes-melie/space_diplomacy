@@ -1,5 +1,6 @@
 import express from 'express';
 
+import authRouter from './authRouter';
 interface CountResponse {
 	count: number;
 }
@@ -16,5 +17,7 @@ router.get<{}, CountResponse>('/', (req, res) => {
 router.post<{}, CountResponse>('/inc', (req, res) => {
 	res.json({ count: ++count });
 });
+
+router.use(`auth`, authRouter);
 
 export default router;

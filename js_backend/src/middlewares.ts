@@ -1,5 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 
+export class ErrorMessage extends Error {
+	status: number;
+	constructor(message: string, status?: number) {
+		super(message);
+		this.status = status || 500;
+		Object.setPrototypeOf(this, ErrorMessage.prototype);
+	}
+}
 export default interface ErrorResponse {
 	error: {
 		message: string;
