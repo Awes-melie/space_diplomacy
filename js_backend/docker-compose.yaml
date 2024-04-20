@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+    mongodb:
+        image: mongo
+        ports:
+            - '27017:27017'
+        volumes:
+            - space_diplomacy_dev_data:/data/db
+volumes:
+    space_diplomacy_dev_data:
