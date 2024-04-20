@@ -5,15 +5,19 @@ import './App.css';
 import { api } from './backend_hook.ts';
 import 'vite/modulepreload-polyfill';
 
+type GameState = { count: number };
+
 function App() {
 	const [count, setCount] = useState(0);
 
 	async function clickButton() {
 		console.log('Clicked! Notifying backend.');
-		const [json, _err] = await api('/inc', { method: 'POST' });
-		if (json) {
-			console.log('New value Recieved ' + json.count);
-			setCount(json.count);
+		const { data, error } = await api<GameState>('/inc', {
+			method: 'POST',
+		});
+		if (data && !error) {
+			console.log('New value Recieved ' + data.count);
+			setCount(data.count);
 		}
 	}
 
@@ -22,9 +26,10 @@ function App() {
 		console.log('App mounted fetching initail count');
 		(async () => {
 			// this is a self-calling asynchronous function
-			const [json, _err2] = await api('/');
-			if (json) {
-				setCount(json.count);
+			const { data, error } = await api<GameState>('/');
+
+			if (data && !error) {
+				setCount(data.count);
 			}
 		})();
 	}, []);
