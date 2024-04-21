@@ -7,27 +7,32 @@
 
 ## Game info
 
-- GET `/api/v1/games/gameId` - gets game state
+- GET `/api/v1/games/:gameId` - gets game state
   ```
     {
       name: String
       status: int (forming, running, paused, ended)
-      winners: [String]
+      winners?: [String]
     }
   ```
 
 - DELETE `.../:gameId` - deletes a game (only permitted by game creator)
 
+### Settings
+
 - GET `.../:gameId/settings` - gets game settings
   ```
     {
-      #settings TODO
+      private: Bool
+      adjudicationTime: Time
+      longAdjudication: float (seconds, Spring and Autumn) 
+      shortAdjudication: float (seconds, Retreats and Winter)
     }
   ```
 
 - POST `.../:gameId/settings` - updates game settings, equivalent to above
 
-### Settings
+### Topology
 
 - GET `.../:gameId/topology` - gets game topography information (static)
   ```
@@ -40,26 +45,30 @@
   ```
     {
       name: String
-      x: int
-      y: int
-      z: int
       sc: bool
-      homeSc: int (home power ID)
+      homeSc?: int (home power ID)
     }
   ```
 
-- GET `.../:gameId/topology/edges` - gets list of edges between nodes (undirected graph) (static)
+- GET `.../:gameId/topology/:nodeId/position` - gets information about a given node (static)
   ```
     {
-      edges: [
-        [int,int]
-      ]
+      x: int
+      y: int
+      z: int
+    }
+  ```
+
+- GET `.../:gameId/topology/:nodeId/edges` - gets list of edges between nodes (undirected graph) (static)
+  ```
+    {
+      edges: [int]
     }
   ```
 
 ### Player data
 
-- POST `.../:gameId/players` - join a game
+- POST `.../:gameId/players` - join a game (Can invite players if host)
 
 - GET `.../:gameId/players` - gets current players (static when game starts)
   ```
@@ -101,35 +110,32 @@
     }
   ```
 
-- GET `.../:gameId/state/powers/:power` -
+- GET `.../:gameId/state/powers/:power` - Returns the state of a given power
   ```
     {
       state: int (defeated, active)
     }
   ```
 
-  - GET `.../:gameId/state/:nodeId/order` - gets current state of a node (Only returns anything for nodes matching player)
-  ```
-    {
-      type: int (move, hold, support)
-      from: int (Territory id to act from (Only used for support orders, -1 otherwise))
-      to: int (Territory id to act to (For move and support orders, -1 otherwise))
-    }
-  ```
+`Order` Message:
+```
+  {
+    type: int (move, hold, support)
+    from?: int (Territory id to act from (Only used for support orders, -1 otherwise))
+    to?: int (Territory id to act to (For move and support orders, -1 otherwise))
+  }
+```
 
-- POST `.../:gameId/state/:nodeId/order` - send a player update
-  ```
-    {
-      type: int (move, hold, support)
-      from: int (Territory id to act from (Only used for support orders, -1 otherwise))
-      to: int (Territory id to act to (For move and support orders, -1 otherwise))
-    }
-  ```
+- GET `.../:gameId/state/:nodeId/order` - gets current node's order (Only returns anything for nodes matching player)
+  Gets an Order
+
+- POST `.../:gameId/state/:nodeId/order` - send a move update (only valid on owned nodes)
+  Posts an Order
 
 ### History
 
 - GET `.../:gameId/:time` - gets game state at a previous time
-  Same as for getting /state but all orders regardless of power can be seen and they contain a result (int) flag.
+  Same as for getting /state but all orders regardless of power can be seen and /order/result contains a result (int) flag.
 
 ### Messages
 
