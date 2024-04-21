@@ -5,6 +5,7 @@ import { ErrorMessage } from '../middlewares';
 
 export interface UserDB {
 	email: string;
+	displayName: string;
 	created: Date;
 	localCredentials: {
 		verified: false | Date;
@@ -40,6 +41,12 @@ export class User {
 		return mongo.db.collection<UserDB>('users');
 	}
 
+	/** removes secret server-side data  */
+	static sanitize(user: UserDB): Omit<UserDB, 'localCredentials'> {
+		const { localCredentials, ...sanitisedUser } = user;
+		return sanitisedUser;
+	}
+
 	static async createIndexes() {
 		if (!(await User.collection.indexExists('email_1'))) {
 			console.log('Creating index on User:email');
@@ -52,39 +59,58 @@ export class User {
 		}
 	}
 
-	/** creates a new user with password, returning that user */
-	static async create(email: string, password: string) {
-		const hashedPassword = await hashPassword(password);
+	/** creates a new unverified user */
+	static async create(email: string, displayName: string) {
+		const canonicalisedEmail = email.trim().toLocaleLowerCase();
+		if (!email || email.length < 3 || email.length > 320)
+			throw new ErrorMessage('Invalid email address', 400);
+		if (displayName.length < 3 || displayName.length > 32)
+			throw new ErrorMessage('Invalid displayName', 400);
+
+		let newlyInserted = false;
 
 		try {
-			await User.collection.insertOne({
-				email,
+			const res = await User.collection.insertOne({
+				email: canonicalisedEmail,
+				displayName,
 				created: new Date(),
 				localCredentials: {
 					verified: false,
 					verificationCode: v4(),
-					hashedPassword,
+					hashedPassword: 'unverified:account',
 				},
 			});
+			if (res.insertedId) {
+				newlyInserted = true;
+			}
 		} catch (err) {
-			// user may already exist
+			if (!`${err}`.includes('E11000')) {
+				// E11000 this is the error code for duplicate key
+				// so this is another error - rethrow
+				throw err;
+			}
+			// user already exists.. this is a no-op
 		}
 
 		const user = await User.collection.findOne({ email });
 
 		if (!user) throw new ErrorMessage('Failed to create the user');
-		if (user.localCredentials.verified)
-			throw new ErrorMessage('User already exists', 400);
-		if (user.localCredentials.verificationCode)
-			throw new ErrorMessage('User already exists', 400);
 
-		const { localCredentials, ...sanitisedUser } = user;
-		return sanitisedUser;
+		return { newlyInserted, user: User.sanitize(user) };
 	}
 
 	/** Called to verify an account email - clears the verificationCode and sets
 	 * it to verified returning the user document on success, or null on failure*/
-	static async verify(email: string, verificationCode: string) {
+	static async verify(
+		email: string,
+		verificationCode: string,
+		password1: string,
+		password2: string
+	) {
+		if (password1 !== password2)
+			throw new ErrorMessage('Passwords do not match');
+		const hashedPassword = await hashPassword(password1);
+
 		const user = await User.collection.findOneAndUpdate(
 			{
 				email,
@@ -94,6 +120,7 @@ export class User {
 			{
 				$set: {
 					'localCredentials.verified': new Date(),
+					'localCredentials.hashedPassword': hashedPassword,
 				},
 				$unset: {
 					'localCredentials.verificationCode': 1,
@@ -105,8 +132,7 @@ export class User {
 		);
 		if (!user) throw new ErrorMessage('Unable to verify the user', 404);
 
-		const { localCredentials, ...sanitisedUser } = user;
-		return sanitisedUser;
+		return User.sanitize(user);
 	}
 
 	static async authenticate(email: string, password: string) {
@@ -116,13 +142,11 @@ export class User {
 		});
 		const valid = await validatePassword(
 			password,
-			user?.localCredentials.hashedPassword ||
-				'nonexistinguserhash.andsalt'
+			user?.localCredentials.hashedPassword || 'unverified:account'
 		);
 		if (!valid) return null;
 		if (!user) throw new ErrorMessage('Unable to verify the user', 404);
 
-		const { localCredentials, ...sanitisedUser } = user;
-		return sanitisedUser;
+		return User.sanitize(user);
 	}
 }

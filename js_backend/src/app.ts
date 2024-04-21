@@ -3,6 +3,9 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
 
+require('body-parser');
+require('express-async-errors');
+
 import * as middlewares from './middlewares';
 import api from './api';
 import { Status, mongo } from './database';

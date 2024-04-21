@@ -18,6 +18,6 @@ router.post<{}, CountResponse>('/inc', (req, res) => {
 	res.json({ count: ++count });
 });
 
-router.use(`auth`, authRouter);
+router.use(`/auth`, authRouter);
 
 export default router;
