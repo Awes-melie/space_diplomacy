@@ -1,12 +1,24 @@
 import express from 'express';
 import { User } from '../models/User';
-import { ErrorMessage } from '../middlewares';
+import { ErrorMessage, ValidationError } from '../middlewares';
+import { UserCreationRequestBody, userCreationBodySchema } from '../types/User';
+import { makeValidator } from '../validation';
 
 const authRouter = express.Router();
 
+const validateUserCreationRequestBody = makeValidator<UserCreationRequestBody>(
+	userCreationBodySchema
+);
+
 authRouter.post<{}, unknown>('/register', async (req, res) => {
-	const newUser = await User.create(req.body.email, req.body.displayName);
-	res.json(newUser);
+	const { valid, errors, data } = validateUserCreationRequestBody(req.body);
+	if (errors) {
+		throw new ValidationError(errors);
+	}
+	if (valid) {
+		const newUser = await User.create(data);
+		res.json(newUser);
+	}
 });
 
 authRouter.post<{}, unknown>('/verify-email', async (req, res) => {

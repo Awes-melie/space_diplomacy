@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../backend_hook';
+import { Page } from '../components/Page.styled';
 
 export const Register = () => {
 	const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ export const Register = () => {
 		if (error) setErrorMessage(error.message);
 	};
 	return (
-		<>
+		<Page>
 			<form onSubmit={onSubmit}>
 				<label htmlFor="email">Email</label>
 				<input
@@ -50,6 +51,6 @@ export const Register = () => {
 				<button type="submit">Submit</button>
 				{errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 			</form>
-		</>
+		</Page>
 	);
 };

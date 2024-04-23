@@ -2,6 +2,7 @@ import { mongo } from '../database';
 import { v4 } from 'uuid';
 import { scrypt, randomBytes, timingSafeEqual } from 'node:crypto';
 import { ErrorMessage } from '../middlewares';
+import { UserCreationRequestBody } from '../types/User';
 
 export interface UserDB {
 	email: string;
@@ -60,12 +61,9 @@ export class User {
 	}
 
 	/** creates a new unverified user */
-	static async create(email: string, displayName: string) {
+	static async create(body: UserCreationRequestBody) {
+		const { email, displayName } = body;
 		const canonicalisedEmail = email.trim().toLocaleLowerCase();
-		if (!email || email.length < 3 || email.length > 320)
-			throw new ErrorMessage('Invalid email address', 400);
-		if (displayName.length < 3 || displayName.length > 32)
-			throw new ErrorMessage('Invalid displayName', 400);
 
 		let newlyInserted = false;
 
@@ -92,7 +90,9 @@ export class User {
 			// user already exists.. this is a no-op
 		}
 
-		const user = await User.collection.findOne({ email });
+		const user = await User.collection.findOne({
+			email: canonicalisedEmail,
+		});
 
 		if (!user) throw new ErrorMessage('Failed to create the user');
 
