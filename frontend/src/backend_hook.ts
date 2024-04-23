@@ -21,15 +21,31 @@ type ApiErrorResponse = {
 	status?: number;
 };
 
+interface APIOptions extends Omit<RequestInit, 'body'> {
+	body?: Record<string, unknown>;
+}
+
 type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 export async function api<T>(
 	path: string,
-	options?: RequestInit
+	options?: APIOptions
 ): Promise<ApiResponse<T>> {
 	let status;
 	try {
-		const response = await fetch(`${BACKEND}/api/v1${path}`, options);
+		const requestInit: RequestInit = {
+			...options,
+			body: undefined,
+		};
+		if (options?.body) {
+			requestInit.body = JSON.stringify(options.body);
+			requestInit.headers = new Headers(requestInit.headers);
+			requestInit.headers.set('Accept', 'application/json');
+			requestInit.headers.set('Content-Type', 'application/json');
+		}
+		const response = await fetch(`${BACKEND}/api/v1${path}`, {
+			...requestInit,
+		});
 		status = response.status;
 		const data = await response.json();
 		if (data.error) {

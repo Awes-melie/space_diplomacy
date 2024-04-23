@@ -1,5 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 
+export class ErrorMessage extends Error {
+	status: number;
+	constructor(message: string, status?: number) {
+		super(message);
+		this.status = status || 500;
+		Object.setPrototypeOf(this, ErrorMessage.prototype);
+	}
+}
 export default interface ErrorResponse {
 	error: {
 		message: string;
@@ -20,7 +28,13 @@ export function errorHandler(
 	res: Response<ErrorResponse>,
 	next: NextFunction
 ) {
-	const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
+	const statusCode =
+		res.statusCode !== 200
+			? res.statusCode
+			: err instanceof ErrorMessage
+			? err.status
+			: 500;
+
 	res.status(statusCode);
 	res.json({
 		error: {
