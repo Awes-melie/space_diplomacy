@@ -3,10 +3,16 @@
 - GET `/` - health endpoint
 - GET `/api/v1`
 - POST `/api/v1/auth/*` - routes to authenticate and create users
-- POST `/api/v1/games` - create a new game
+- GET `/api/v1/games` - Lists all games
 
 ## Game info
-
+- Post `/api/v1/games/create` - Setup new game
+  ```
+    {
+      name: String
+    }
+  ```
+  
 - GET `/api/v1/games/:gameId` - gets game state
   ```
     {
