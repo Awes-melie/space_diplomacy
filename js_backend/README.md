@@ -6,14 +6,17 @@
 - GET `/api/v1/games` - Lists all games
 
 ## Game info
-- Post `/api/v1/games/create` - Setup new game
+
+- POST `/api/v1/games/create` - Setup new game
   ```
     {
       name: String
+      email: String (host)
+      privateSession: boolean
     }
   ```
-  
 - GET `/api/v1/games/:gameId` - gets game state
+
   ```
     {
       name: String
@@ -27,11 +30,12 @@
 ### Settings
 
 - GET `.../:gameId/settings` - gets game settings
+
   ```
     {
       private: Bool
       adjudicationTime: Time
-      longAdjudication: float (seconds, Spring and Autumn) 
+      longAdjudication: float (seconds, Spring and Autumn)
       shortAdjudication: float (seconds, Retreats and Winter)
     }
   ```
@@ -41,6 +45,7 @@
 ### Topology
 
 - GET `.../:gameId/topology` - gets game topography information (static)
+
   ```
     {
       nodes: int (number of nodes)
@@ -48,6 +53,7 @@
   ```
 
 - GET `.../:gameId/topology/:nodeId` - gets information about a given node (static)
+
   ```
     {
       name: String
@@ -57,6 +63,7 @@
   ```
 
 - GET `.../:gameId/topology/:nodeId/position` - gets information about a given node (static)
+
   ```
     {
       x: int
@@ -77,6 +84,7 @@
 - POST `.../:gameId/players` - join a game (Can invite players if host)
 
 - GET `.../:gameId/players` - gets current players (static when game starts)
+
   ```
     {
       players: [String] (player usernames)
@@ -102,6 +110,7 @@
 - POST `.../:gameId/state` - start a game (only permitted by game creator)
 
 - GET `.../:gameId/state` - gets current game state
+
   ```
     {
       time: int
@@ -109,6 +118,7 @@
   ```
 
 - GET `.../:gameId/state/:nodeId` - gets current state of a node
+
   ```
     {
       owner: String (if sc node)
@@ -124,6 +134,7 @@
   ```
 
 `Order` Message:
+
 ```
   {
     type: int (move, hold, support)
@@ -146,6 +157,7 @@
 ### Messages
 
 - POST `.../:gameId/threads` - create new message thread
+
   ```
     {
       name: String
@@ -154,6 +166,7 @@
   ```
 
 - GET `.../:gameId/threads/:threadId` - gets information about a thread
+
   ```
     {
       name: String
@@ -162,6 +175,7 @@
   ```
 
 - GET `.../:gameId/threads/:threadId/:messageID` - gets message from a thread
+
   ```
     {
       sender_id: String

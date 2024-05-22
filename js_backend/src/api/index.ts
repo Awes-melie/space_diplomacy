@@ -1,6 +1,7 @@
 import express from 'express';
 
 import authRouter from './authRouter';
+import gameRouter from './gameRouter';
 interface CountResponse {
 	count: number;
 }
@@ -19,5 +20,6 @@ router.post<{}, CountResponse>('/inc', (req, res) => {
 });
 
 router.use(`/auth`, authRouter);
+router.use(`/games`, gameRouter);
 
 export default router;
