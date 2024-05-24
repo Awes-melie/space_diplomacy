@@ -1,12 +1,13 @@
+import { ObjectId } from 'mongodb';
 import { mongo } from '../database';
 import { ErrorMessage } from '../middlewares';
 import { User } from './User';
 
 export enum GameStatus {
-	FORMING,
-	RUNNING,
-	PAUSED,
-	ENDED,
+	FORMING = 'forming',
+	RUNNING = 'running',
+	PAUSED = 'paused',
+	ENDED = 'ended',
 }
 
 export interface GameDB {
@@ -19,6 +20,15 @@ export interface GameDB {
 export class Game {
 	static get collection() {
 		return mongo.db.collection<GameDB>('games');
+	}
+
+	static async find_game(id: string) {
+		try {
+			let _id = new ObjectId(id);
+			return await Game.collection.findOne({ _id });
+		} catch (err) {
+			throw new ErrorMessage('Game not found', 404);
+		}
 	}
 
 	/** creates a new game */

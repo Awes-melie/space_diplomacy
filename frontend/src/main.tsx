@@ -5,6 +5,7 @@ import './index.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Register } from './pages/Register.tsx';
 import { CreateGame } from './pages/CreateGame.tsx';
+import { Game } from './pages/Game.tsx';
 
 const router = createBrowserRouter([
 	{
@@ -16,8 +17,16 @@ const router = createBrowserRouter([
 		element: <Register />,
 	},
 	{
+		path: '/games/',
+		element: <CreateGame />, //Temporary
+	},
+	{
 		path: '/games/create',
 		element: <CreateGame />,
+	},
+	{
+		path: '/games/:gameId',
+		element: <Game />,
 	},
 ]);
 
